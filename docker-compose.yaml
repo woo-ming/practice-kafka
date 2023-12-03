@@ -1,76 +1,112 @@
 version: '3'
 services:
-  zookeeper:
+  zookeeper1: # https://hub.docker.com/_/zookeeper
     image: zookeeper:3.7
-    hostname: zookeeper
+    container_name: zookeeper1
+    restart: always
+    hostname: zookeeper1
     ports:
-      - "2181:2181"
+      - 17286:2181
     environment:
       ZOO_MY_ID: 1
-      ZOO_PORT: 2181
-    volumes:
-      - ./data/zookeeper/data:/data
-      - ./data/zookeeper/datalog:/datalog
+      ZOO_SERVERS: server.1=zookeeper186:2888:3888;2181
+      # ZOO_TICK_TIME: 2000
+      # ZOO_INIT_LIMIT: 5
+      # ZOO_SYNC_LIMIT: 2
+      # ZOO_MAX_CLIENT_CNXNS: 60
+      # ZOO_STANDALONE_ENABLED: true
+      # ZOO_ADMINSERVER_ENABLED: true
+      # ZOO_AUTOPURGE_PURGEINTERVAL: 0
+      # ZOO_AUTOPURGE_SNAPRETAINCOUNT: 3
+      # ZOO_4LW_COMMANDS_WHITELIST: srvr
 
-  kafka1:
-    image: confluentinc/cp-kafka:7.0.0
-    hostname: kafka1
+  zookeeper2: # https://hub.docker.com/_/zookeeper
+    image: zookeeper:3.7
+    container_name: zookeeper2
+    restart: always
+    hostname: zookeeper2
     ports:
-      - "9091:9091"
+      - 17295:2181
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka1:19091,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9091
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zookeeper195:2888:3888;2181
+      # ZOO_TICK_TIME: 2000
+      # ZOO_INIT_LIMIT: 5
+      # ZOO_SYNC_LIMIT: 2
+      # ZOO_MAX_CLIENT_CNXNS: 60
+      # ZOO_STANDALONE_ENABLED: true
+      # ZOO_ADMINSERVER_ENABLED: true
+      # ZOO_AUTOPURGE_PURGEINTERVAL: 0
+      # ZOO_AUTOPURGE_SNAPRETAINCOUNT: 3
+      # ZOO_4LW_COMMANDS_WHITELIST: srvr
+
+  zookeeper3: # https://hub.docker.com/_/zookeeper
+    image: zookeeper:3.7
+    container_name: zookeeper3
+    restart: always
+    hostname: zookeeper3
+    ports:
+      - 17273:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zookeeper173:2888:3888;2181
+      # ZOO_TICK_TIME: 2000
+      # ZOO_INIT_LIMIT: 5
+      # ZOO_SYNC_LIMIT: 2
+      # ZOO_MAX_CLIENT_CNXNS: 60
+      # ZOO_STANDALONE_ENABLED: true
+      # ZOO_ADMINSERVER_ENABLED: true
+      # ZOO_AUTOPURGE_PURGEINTERVAL: 0
+      # ZOO_AUTOPURGE_SNAPRETAINCOUNT: 3
+      # ZOO_4LW_COMMANDS_WHITELIST: srvr
+
+  kafka-059:
+    image: wurstmeister/kafka
+    container_name: kafka-059
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181
+      # KAFKA_CREATE_TOPICS: 'sum:1:1, pow:1:1' # Topic명:Partition개수:Replica개수
     volumes:
-      - ./data/kafka1/data:/tmp/kafka-logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - '17259:9092'
     depends_on:
-      - zookeeper
+      - zookeeper1
+
   
-  kafka2:
-    image: confluentinc/cp-kafka:7.0.0
-    hostname: kafka2
-    ports:
-      - "9092:9092"
+  kafka-046:
+    image: wurstmeister/kafka
+    container_name: kafka-046
     environment:
-      KAFKA_BROKER_ID: 2
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka2:19092,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper2:2181
     volumes:
-      - ./data/kafka2/data:/tmp/kafka-logs
-    depends_on:
-      - zookeeper
-
-  kafka3:
-    image: confluentinc/cp-kafka:7.0.0
-    hostname: kafka3
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "9093:9093"
+      - '17246:9092'
+    depends_on:
+      - zookeeper2
+
+  
+  kafka-078:
+    image: wurstmeister/kafka
+    container_name: kafka-078
     environment:
-      KAFKA_BROKER_ID: 3
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka3:19093,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper3:2181
     volumes:
-      - ./data/kafka3/data:/tmp/kafka-logs
-    depends_on:
-      - zookeeper
-
-  kafdrop:
-    image: obsidiandynamics/kafdrop
-    restart: "no"
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "9000:9000"
-    environment:
-      KAFKA_BROKER_CONNECT: "kafka1:19091"
+      - '17278:9092'
     depends_on:
-      - kafka1
-      - kafka2
-      - kafka3
+      - zookeeper3
